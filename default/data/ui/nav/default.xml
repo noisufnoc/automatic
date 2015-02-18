@@ -1,0 +1,14 @@
+<nav search_view="search">
+  <view name="whats_automatic" />
+  <view name="launchpad" default="true" />
+  <view name="fuel" />
+  <view name="geographic" />
+  <view name="search" />
+  <view name="future" />
+  <collection label="Other Dashboards">
+    <view source="unclassified"/>
+  </collection>
+  <collection label="Other Reports">
+    <saved source="unclassified"/>
+  </collection>
+</nav>

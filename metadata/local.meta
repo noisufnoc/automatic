@@ -1,0 +1,71 @@
+[app/ui]
+version = 6.2.1
+modtime = 1422384409.444751000
+
+[app/launcher]
+version = 6.2.1
+modtime = 1422384409.448191000
+
+[indexes/automatic]
+owner = admin
+version = 6.2.1
+modtime = 1422384460.239092000
+
+[views/geographic]
+owner = admin
+version = 6.2.1
+modtime = 1424215371.325555000
+
+[nav/default]
+version = 6.2.1
+modtime = 1424281144.053309000
+
+[views/fuel]
+export = none
+owner = admin
+version = 6.2.1
+modtime = 1424212269.470949000
+
+[macros/automatic_data]
+export = none
+owner = admin
+version = 6.2.1
+modtime = 1424211610.217341000
+
+[views/launchpad]
+owner = admin
+version = 6.2.1
+modtime = 1424211713.224949000
+
+[macros/remove_invalid]
+export = none
+owner = admin
+version = 6.2.1
+modtime = 1424211628.878674000
+
+[views/future]
+export = none
+owner = admin
+version = 6.2.1
+modtime = 1424215541.920714000
+
+[inputs/rest%3A%2F%2Fautomatic_trips]
+version = 6.2.1
+modtime = 1424211023.415041000
+
+[props/automatic_test1]
+owner = admin
+version = 6.2.1
+modtime = 1423687935.845739000
+
+[macros/automatic_index]
+export = none
+owner = admin
+version = 6.2.1
+modtime = 1424209036.770307000
+
+[props/automatic/EVAL-duration]
+export = none
+owner = admin
+version = 6.2.1
+modtime = 1424209743.511266000

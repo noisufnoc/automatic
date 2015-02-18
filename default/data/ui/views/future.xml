@@ -1,0 +1,20 @@
+<dashboard>
+  <label>Future</label>
+  <description>Ideas for future enhancements.</description>
+  <row>
+    <panel>
+      <title>Future Ideas/Improvements</title>
+      <html>
+    <ul>
+      <li>Review formula for fuel efficiency improvement. It can be stronger</li>
+      <li>Calculate $ savings from fuel improvements</li>
+      <li>Info on https://www.automatic.com/ and what it is and what it collects.</li>
+      <li>Fuel Efficiency by distance from home (area I'm familiar with).</li>
+      <li>Predict my next trip.</li>
+      <li>Dyanmically pull data from automatic's REST API</li>
+      <li>Correlated with MBTA data (from REST API) - see if traffic gets worse when T is backed up</li>
+      </ul>
+    </html>
+    </panel>
+  </row>
+</dashboard>

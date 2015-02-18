@@ -1,0 +1,108 @@
+<form script="autodiscover.js">
+  <label>Geographic</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Time Period</label>
+      <default>
+        <earliest>0</earliest>
+        <latest></latest>
+      </default>
+    </input>
+    <input type="radio" token="vehicle" searchWhenChanged="true">
+      <label>Select Vehicle:</label>
+      <search>
+        <query>| metadata `automatic_index` type=hosts</query>
+      </search>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <prefix>host=</prefix>
+      <default>*</default>
+      <choice value="*">All</choice>
+    </input>
+  </fieldset>
+  <search id="chordchart_search">
+    <query>
+      <![CDATA[
+start_location.name!="Unknown" end_location.name!="Unknown" 
+$vehicle$ `automatic_data`
+ `remove_invalid`
+ | foreach start end [ rex field=<<FIELD>>_location_name ",\s+[A-Z]{2}\s+(?<<<FIELD>>_zipcode>\d{5}),\s+[A-Z]+" ] 
+ | stats count by start_zipcode, end_zipcode
+ | sort - count
+ | head $density$
+                ]]>
+    </query>
+    <earliest>$time.earliest$</earliest>
+    <latest>$time.latest$</latest>
+  </search>
+  <row>
+    <panel>
+      <title>Geographic Concentration</title>
+      <map>
+        <search>
+          <query>| multisearch
+ [ search $vehicle$ `automatic_data`
+  | eval marker = "start"
+  | rename start_location_lon as lon, start_location_lat as lat ]
+ [ search $vehicle$ `automatic_data`
+  | eval marker = "end"
+  | rename end_location_lon as lon, end_location_lat as lat ]
+ | geostats count by marker</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.map.center">(41.62,-72.23)</option>
+        <option name="mapping.map.zoom">7</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.tileLayer.maxZoom">19</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="drilldown">all</option>
+
+      </map>
+    </panel>
+    <panel>
+      <title>Transit Activity</title>
+      <table>
+        <search>
+          <query>$vehicle$ `automatic_data` 
+ `remove_invalid`
+ |  foreach *_lon *_lat [ eval &lt;&lt;FIELD&gt;&gt; = round( &lt;&lt;FIELD&gt;&gt; , 1 ) ]
+ |  foreach start end [ eval &lt;&lt;FIELD&gt;&gt; = &lt;&lt;FIELD&gt;&gt;_location_lon . ", " . &lt;&lt;FIELD&gt;&gt;_location_lat ]  
+ |  stats mode(*_name) as *_name, count by start, end  
+ |  table start_location_name, end_location_name, count  
+ |  sort - count</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Zip Code Transit Distribution</title>
+      <input type="radio" token="density" searchWhenChanged="true">
+        <label>Result Density</label>
+        <choice value="10">Standard</choice>
+        <choice value="20">Denser</choice>
+        <choice value="30">More Dense</choice>
+        <choice value="40">Denser</choice>
+        <choice value="50">Super Dense</choice>
+        <choice value="60">Woah, too dense!</choice>
+        <default>10</default>
+      </input>
+      <html>
+        <div id="chordchart" class="splunk-view" data-require="app/automatic/chordchart/chordchart" 
+        data-options="{           &quot;managerid&quot;: &quot;chordchart_search&quot;,           &quot;src_field&quot;: &quot;start_zipcode&quot;,           &quot;dst_field&quot;: &quot;end_zipcode&quot;,           &quot;colors&quot;: &quot;d3&quot;         }">
+        </div>
+      </html>
+    </panel>
+  </row>
+</form>

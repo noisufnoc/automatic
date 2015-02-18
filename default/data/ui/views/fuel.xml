@@ -1,0 +1,150 @@
+<form script="autodiscover.js">
+  <label>Fuel</label>
+  <description>Fuel efficiency and consumption details.</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Time Period</label>
+      <default>
+        <earliest>0</earliest>
+        <latest></latest>
+      </default>
+    </input>
+    <input type="radio" token="vehicle" searchWhenChanged="true">
+      <label>Select Vehicle:</label>
+      <search>
+        <query>| metadata `automatic_index` type=hosts</query>
+      </search>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <prefix>host=</prefix>
+      <default>*</default>
+      <choice value="*">All</choice>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Fuel Efficiency Improvement</title>
+        <search>
+          <query>average_mpg=* $vehicle$ `automatic_data`
+ `remove_invalid`
+ | timechart span=1week avg(average_mpg) as period_avg
+ | streamstats avg(period_avg) as cumulative_avg
+ | stats first(cumulative_avg) as start last(cumulative_avg) as end
+ | eval improvement = round( ( ( end - start ) / start ) * 100 , 2 ) . "%" 
+ | fields + improvement</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+      <single>
+        <title>Fuel Efficiency</title>
+        <search>
+          <query>average_mpg=* duration_m=* distance_mi=* $vehicle$ `automatic_data`
+ `remove_invalid`
+ | eval avg_speed = distance_mi / ( duration_m / 60 )
+ | stats avg(average_mpg) as avg
+ | fieldformat avg = round( avg , 2 ) . " mpg"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+      <single>
+        <title>Fuel Consumed</title>
+        <search>
+          <query>fuel_volume_gal=* $vehicle$ `automatic_data`
+ `remove_invalid`
+ | stats sum(fuel_volume_gal) as sum
+ | fieldformat sum = round( sum , 2 ) . " gallons"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Fuel Efficiency Over Time</title>
+      <chart>
+        <search>
+          <query>$vehicle$ `automatic_data`  `remove_invalid`  | timechart sum(hard_*) as hard_*, sum(duration_over_*) as duration_over_*, avg(average_mpg) as average_mpg</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisY2.enabled">true</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.overlayFields">average_mpg</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Fuel Efficiency by $metric$</title>
+      <input type="radio" token="metric" searchWhenChanged="true">
+        <label>Metric</label>
+        <choice value="avg_speed">Trip Average Speed (mph)</choice>
+        <choice value="distance_mi">Trip Distance (mi)</choice>
+        <choice value="duration_m">Trip Duration (min)</choice>
+        <default>avg_speed</default>
+      </input>
+      <chart>
+        <search>
+          <query>average_mpg=* duration_m=* distance_mi=* $vehicle$ `automatic_data`
+ `remove_invalid`
+ | eval avg_speed = distance_mi / ( duration_m / 60 )
+ | bin span=10 $metric$ 
+ | stats avg(average_mpg) by $metric$
+ | sort num($metric$)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+      </chart>
+    </panel>
+  </row>
+</form>

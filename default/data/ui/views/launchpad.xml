@@ -1,0 +1,130 @@
+<form>
+  <label>Launchpad</label>
+  <description>Starting point for exploring automatic data.</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Select Time Period:</label>
+      <default>
+        <earliest>0</earliest>
+        <latest></latest>
+      </default>
+    </input>
+    <input type="radio" token="vehicle" searchWhenChanged="true">
+      <label>Select Vehicle:</label>
+      <search>
+        <query>| metadata `automatic_index` type=hosts</query>
+      </search>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <prefix>host=</prefix>
+      <default>*</default>
+      <choice value="*">All</choice>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Summaries</title>
+      <single>
+        <title>Total Trips</title>
+        <search>
+          <query>$vehicle$ `automatic_data`
+ | stats count as trips</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+      </single>
+      <single>
+        <title>Cumulative Driving Time</title>
+        <search>
+          <query>$vehicle$ `automatic_data`
+ | stats sum(duration_s) as metric
+ | eval metric = round( metric , 2 )
+ | fieldformat metric = tostring( metric , "duration" )</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+      <single>
+        <title>Total Distance Traveled (mi)</title>
+        <search>
+          <query>$vehicle$ `automatic_data`
+ | stats sum(distance_mi) as distance
+ | eval distance = round( distance , 2 )</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+      <single>
+        <title>Distance (Millennium Falcon Kessel Runs)</title>
+        <search>
+          <query>$vehicle$ `automatic_data`
+ | stats sum(distance_mi) as distance
+ | eval parsec = round( distance / (12 * ( 19.17 * 1000000000000 ) ) , 15 )
+ | fields + parsec</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Number of Trips</title>
+      <chart>
+        <search>
+          <query>$vehicle$ `automatic_data`
+ | timechart count as trips</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Data Pool Highlights</title>
+      <table>
+        <search>
+          <query>| metadata `automatic_index` type=hosts
+ | convert ctime(*ime)
+ | table host, firstTime, recentTime
+ | rename host as Vehicle, firstTime as "Earliest Trip", recentTime as "Most Recent Trip"</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+</form>

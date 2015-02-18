@@ -1,0 +1,11 @@
+<dashboard>
+  <label>What's Automatic?</label>
+  <description>Background info on where this data came from.</description>
+  <row>
+    <panel>
+      <html>
+	<h1>Dude, let's put stuff here</h1>
+    </html>
+    </panel>
+  </row>
+</dashboard>

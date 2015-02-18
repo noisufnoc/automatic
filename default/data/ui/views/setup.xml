@@ -1,0 +1,11 @@
+<dashboard>
+  <label>Setup</label>
+  <description>Used for adding new data.</description>
+  <row>
+    <panel>
+      <html>
+	<h1>Put some setup stuff here to allow new data points to be added.</h1>
+    </html>
+    </panel>
+  </row>
+</dashboard>
